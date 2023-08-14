@@ -1,0 +1,120 @@
+{% extends 'blog/base.html' %}
+{% load static %}
+
+{% block navegador %}
+<a href={% url 'inicio' %} class="nav-item nav-link ">inicio</a>
+<a href={% url 'about' %} class="nav-item nav-link active">Acerca de</a>
+<a href={% url 'contacto' %} class="nav-item nav-link">Contacto</a>
+{%if request.user.is_authenticated %}
+    <a href={% url 'info' %} class="nav-item nav-link">Info</a>
+{% endif %}
+{% endblock navegador %}
+
+
+{% block contenedor %}
+
+    <!-- About Start -->
+    <div class="container-fluid py-5">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-5 pb-4 pb-lg-0">
+                    <img class="img-fluid w-100" src={% static 'blog_plantilla/img/about.jpg' %} alt="">
+                    <div class="bg-primary text-dark text-center p-4">
+                        <h3 class="m-0">Developer</h3>
+                    </div>
+                </div>
+                <div class="col-lg-7">
+                    <h6 class="text-primary text-uppercase font-weight-bold">Acerca de</h6>
+                    <h1 class="mb-4">Developer</h1>
+                    <p>{{ acerca|safe }}</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <!-- About End -->
+
+    <!-- Team Start -->
+    <div class="container-fluid pt-5">
+        <div class="container">
+            <div class="text-center pb-2">
+                <h6 class="text-primary text-uppercase font-weight-bold">Developer</h6>
+                <h1 class="mb-4"> Escobardie </h1>
+            </div>
+            <div class="row align-items-center">
+                <div class="container col-lg-3 col-md-6">
+                    <div class="team card position-relative overflow-hidden border-0 mb-5">
+                        <img class="card-img-top" src={% static 'blog_plantilla/img/team-1.jpg' %} alt="">
+                        <div class="card-body text-center p-0">
+                            <div class="team-text d-flex flex-column justify-content-center bg-secondary">
+                                <h5 class="font-weight-bold">Diego Escobar</h5>
+                                <span>Developer</span>
+                            </div>
+                            <div class="team-social d-flex align-items-center justify-content-center bg-primary">
+                                <a class="btn btn-outline-dark btn-social mr-2" href="#"><i class="fab fa-twitter"></i></a>
+                                <a class="btn btn-outline-dark btn-social mr-2" href="#"><i class="fab fa-facebook-f"></i></a>
+                                <a class="btn btn-outline-dark btn-social mr-2" href="#"><i class="fab fa-linkedin-in"></i></a>
+                                <a class="btn btn-outline-dark btn-social" href="#"><i class="fab fa-instagram"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--
+                <div class="col-lg-3 col-md-6">
+                    <div class="team card position-relative overflow-hidden border-0 mb-5">
+                        <img class="card-img-top" src={% static 'blog_plantilla/img/team-2.jpg' %} alt="">
+                        <div class="card-body text-center p-0">
+                            <div class="team-text d-flex flex-column justify-content-center bg-secondary">
+                                <h5 class="font-weight-bold">Alejandro Cruz</h5>
+                                <span>Developer</span>
+                            </div>
+                            <div class="team-social d-flex align-items-center justify-content-center bg-primary">
+                                <a class="btn btn-outline-dark btn-social mr-2" href="#"><i class="fab fa-twitter"></i></a>
+                                <a class="btn btn-outline-dark btn-social mr-2" href="#"><i class="fab fa-facebook-f"></i></a>
+                                <a class="btn btn-outline-dark btn-social mr-2" href="#"><i class="fab fa-linkedin-in"></i></a>
+                                <a class="btn btn-outline-dark btn-social" href="#"><i class="fab fa-instagram"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="team card position-relative overflow-hidden border-0 mb-5">
+                        <img class="card-img-top" src={% static 'blog_plantilla/img/team-3.jpg' %} alt="">
+                        <div class="card-body text-center p-0">
+                            <div class="team-text d-flex flex-column justify-content-center bg-secondary">
+                                <h5 class="font-weight-bold">Victor	Abba</h5>
+                                <span>Developer</span>
+                            </div>
+                            <div class="team-social d-flex align-items-center justify-content-center bg-primary">
+                                <a class="btn btn-outline-dark btn-social mr-2" href="#"><i class="fab fa-twitter"></i></a>
+                                <a class="btn btn-outline-dark btn-social mr-2" href="#"><i class="fab fa-facebook-f"></i></a>
+                                <a class="btn btn-outline-dark btn-social mr-2" href="#"><i class="fab fa-linkedin-in"></i></a>
+                                <a class="btn btn-outline-dark btn-social" href="#"><i class="fab fa-instagram"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <div class="team card position-relative overflow-hidden border-0 mb-5">
+                        <img class="card-img-top" src={% static 'blog_plantilla/img/team-4.jpg' %} alt="">
+                        <div class="card-body text-center p-0">
+                            <div class="team-text d-flex flex-column justify-content-center bg-secondary">
+                                <h5 class="font-weight-bold">Matias	Del Fabro</h5>
+                                <span>Developer</span>
+                            </div>
+                            <div class="team-social d-flex align-items-center justify-content-center bg-primary">
+                                <a class="btn btn-outline-dark btn-social mr-2" href="#"><i class="fab fa-twitter"></i></a>
+                                <a class="btn btn-outline-dark btn-social mr-2" href="#"><i class="fab fa-facebook-f"></i></a>
+                                <a class="btn btn-outline-dark btn-social mr-2" href="#"><i class="fab fa-linkedin-in"></i></a>
+                                <a class="btn btn-outline-dark btn-social" href="#"><i class="fab fa-instagram"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                -->
+            </div>
+        </div>
+    </div>
+    <!-- Team End -->
+
+{% endblock contenedor %}
