@@ -2,9 +2,10 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('suscrip/', views.index, name='letter-index'),
-    path('mail_letter/', views.mail_letter, name='mail-letter'),
-    
+
+    path('suscrip/', views.SubcriptioView.as_view(), name='suscripcion'), # SUSCRIPCION BASADA EN CLASES
+    path('create_letter/', views.CreateLetterView.as_view(), name='create_letter'), # CREACION DE BOLETIN BASADA EN CLASES
+        
     ################# PAGINA LISTADO DE EMAILS EN HTML #################
     path('listing_letter/', views.ListNewslatterView.as_view(), name='lista_boletin'),
     path('detail_boletin/<int:id>/',views.NewslatterDetailView.as_view(), name='detail_boletin'),

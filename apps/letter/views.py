@@ -10,63 +10,50 @@ from django.urls import reverse_lazy, reverse
 
 # Create your views here.
 
+class SubcriptioView(CreateView):
+    model = Subscribers
+    template_name = 'letter/suscrip.html'
+    form_class = SubscibersForm
+    success_url = reverse_lazy('suscripcion')
 
-def index(request):
-    if request.method == 'POST':
-        form = SubscibersForm(request.POST)
-        # print(request.POST['email']) # obtego el correo enviado par
-        email_validator= request.POST['email']
-        emails = Subscribers.objects.filter(email=email_validator)
-        # print(emails)
+    def form_valid(self, form):
+        email_validator = self.request.POST['email'] # OBTENEMOS EL EMAIL PURO DEL FORMULARIO
+        #print(email_validator)
+        emails = Subscribers.objects.filter(email=email_validator) # FILTRAMOS SI YA EXISTE EL EMAIL DENTRO DE LA BD
+        #print(emails)
+
         if emails:
             print("Email ya Suscripto")
-            messages.success(request, 'Email ya Suscripto')
-            return redirect('/suscrip/')
-        
+            messages.success(self.request, 'Email ya Suscripto') # CREAMOS EL MSJ
+            return redirect('suscripcion') # LO REDIRECIONAMOS NUEVAMENTE A LA PAGINA
         else:
-            # print("Email cargado")
-            if form.is_valid():
-                form.save()
-                messages.success(request, 'Suscripción exitosa')
-                return redirect('/suscrip/')
-    else:
-        form = SubscibersForm()
-    context = {
-        'form': form,
-    }
-    return render(request, 'letter/suscrip.html', context)
+            messages.success(self.request, 'Suscripción exitosa')
+            return super().form_valid(form)
+    
+class CreateLetterView(CreateView):
+    model = MailMessage
+    template_name = 'letter/create_letter.html'
+    form_class = MailMessageForm
+    success_url = reverse_lazy('create_letter')
 
-
-def mail_letter(request):
-    print(request)
-    # OBTENEMOS TODOS LOS CORREO QUE ESTEN ACTIVOS
-    emails = Subscribers.objects.filter(activo=True)
-    # emails = Subscribers.objects.all() # original TRAE TODOS LOS CORREOS
-    df = read_frame(emails, fieldnames=['email'])
-    mail_list = df['email'].values.tolist()
-    print(mail_list)
-    if request.method == 'POST':
-        form = MailMessageForm(request.POST)
-        if form.is_valid():
-            form.save()
-            title = form.cleaned_data.get('title')
-            message = form.cleaned_data.get('message')
-            send_mail(
-                title, # (subject)
-                '', # message, # ORIGINAL (message)
-                'PRUEBA DESDE WEB', # (from_email)
-                mail_list, # (recipient_list)
-                fail_silently=False,
-                html_message=message, # AQUI EL MESAJE SE CONVIERTE EN HTML
-            )
-            messages.success(request, 'El mensaje ha sido enviado a la lista de correo')
-            return redirect('mail-letter')
-    else:
-        form = MailMessageForm()
-    context = {
-        'form': form,
-    }
-    return render(request, 'letter/mail_letter.html', context)
+    def form_valid(self, form):
+        # OBTENEMOS TODOS LOS CORREO QUE ESTEN ACTIVOS
+        emails = Subscribers.objects.filter(activo=True)
+        df = read_frame(emails, fieldnames=['email'])
+        mail_list = df['email'].values.tolist() # OBTENEMOS LA LISTA DE CORREOS
+        form.save() # GUARDAMOS EL FORMULARIO
+        title = form.cleaned_data.get('title')
+        message = form.cleaned_data.get('message')
+        send_mail(
+            title, # (subject)
+            '', # message, # ORIGINAL (message)
+            'PRUEBA DESDE CLASS', # (from_email)
+            mail_list, # (recipient_list)
+            fail_silently=False,
+            html_message=message, # AQUI EL MESAJE SE CONVIERTE EN HTML
+        )
+        messages.success(self.request, 'El mensaje ha sido enviado a la lista de correo')
+        return redirect('create_letter')
 
 
 ################# PAGINA LISTADO DE EMAILS EN HTML #################

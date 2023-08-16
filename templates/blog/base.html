@@ -108,10 +108,10 @@
                                 <div class="dropdown-menu rounded-0 m-0">
                                     {% if request.user.is_staff %}
                                         <a href={% url 'crear_articulo' %} class="dropdown-item">Crear Articulo</a>
-                                        <a href={% url 'letter-index' %} class="dropdown-item">Suscribete</a>
+                                        <a href={% url 'suscripcion' %} class="dropdown-item">Suscribete</a>
                                         <a href={% url 'lista_emails' %} class="dropdown-item">Lista Emails</a>
                                         <a href={% url 'lista_boletin' %} class="dropdown-item">Lista Boletines</a>
-                                        <a href={% url 'mail-letter' %} class="dropdown-item">Envio de Boletin</a>
+                                        <a href={% url 'create_letter' %} class="dropdown-item">Envio de Boletin</a>
                                     {% endif %}
                                         <a href="{% url 'logout' %}" class="dropdown-item">Salir</a>                
                                 </div>
