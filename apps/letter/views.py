@@ -4,12 +4,76 @@ from . models import Subscribers, MailMessage
 from django.contrib import messages
 from django.core.mail import send_mail
 from django_pandas.io import read_frame
-from django.views.generic import TemplateView, ListView, DetailView
+from django.views.generic import TemplateView, ListView, DetailView, View
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy, reverse
 
+
+from typing import Protocol
+from django.template.loader import render_to_string
+from django.contrib.sites.shortcuts import get_current_site
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from .tokens_2 import default_token_generator
+
+
 # Create your views here.
 
+
+def activateEmail(request, user, to_email):
+    mail_subject = "Link de activacion de boletines."
+    message = render_to_string("activation_subs/template_activate_account.html", {
+        #'user': user.id,
+        'domain': get_current_site(request).domain,
+        'uid': urlsafe_base64_encode(force_bytes(user.pk)),
+        'token': default_token_generator.make_token(user),
+        "protocol": 'https' if request.is_secure() else 'http'
+    })
+    
+    email_list =(to_email,)# LO CONVERTIMOS
+    
+    ####################################
+    if send_mail(
+            mail_subject, # (subject)
+            '', # message, # ORIGINAL (message)
+            'VERIFICACION DE CORREO', # (from_email)
+            email_list, # (recipient_list)
+            fail_silently=False,
+            html_message=message, # AQUI EL MESAJE SE CONVIERTE EN HTML
+        ):
+        print('ENVIADO')
+        messages.success(request, f'Se envio link de verificacion a: "{user}", verifique su casilla de correo.')
+    ####################################
+    else:
+        messages.error(request, f'Problema al enviar correo electrónico a {to_email}, verifica si lo escribiste correctamente.')
+
+
+class ActivateView(TemplateView):
+    template_name = "activation_subs/activado.html"
+
+
+class ConfirmationView(View):
+    def get(self, request, uidb64, token):
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            user = Subscribers.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError,Subscribers.DoesNotExist):
+            # Manejar enlace inválido o usuario no encontrado
+            messages.error(request, "El enlace de confirmación es inválido.")
+            return redirect('sub_activado')  # Redirigir a la página de inicio de sesión o donde desees
+        
+        if default_token_generator.check_token(user, token):
+            user.activo = True
+            user.save()
+
+            messages.success(request, "¡Tu cuenta ha sido activada! Ahora puedes recibir boletines.")
+        else:
+            # Manejar token inválido
+            messages.error(request, "El enlace de confirmación es inválido.")
+        
+        return redirect('sub_activado')  # Redirigir a la página de inicio de sesión o donde desees
+
+####################### DEF TO CLASS #######################
 class SubcriptioView(CreateView):
     model = Subscribers
     template_name = 'letter/suscrip.html'
@@ -18,16 +82,21 @@ class SubcriptioView(CreateView):
 
     def form_valid(self, form):
         email_validator = self.request.POST['email'] # OBTENEMOS EL EMAIL PURO DEL FORMULARIO
-        #print(email_validator)
         emails = Subscribers.objects.filter(email=email_validator) # FILTRAMOS SI YA EXISTE EL EMAIL DENTRO DE LA BD
-        #print(emails)
 
         if emails:
             print("Email ya Suscripto")
             messages.success(self.request, 'Email ya Suscripto') # CREAMOS EL MSJ
             return redirect('suscripcion') # LO REDIRECIONAMOS NUEVAMENTE A LA PAGINA
         else:
-            messages.success(self.request, 'Suscripción exitosa')
+            user = form.save()
+            # user.activo=False
+            print('EMAIL: ',form.cleaned_data.get('email'))
+            print('ID: ',user.id)
+            print('DOMINIO: ',get_current_site(self.request).domain)
+            print('UID-PK: ',urlsafe_base64_encode(force_bytes(user.pk)))
+            print('TOKEN: ',default_token_generator.make_token(user))
+            activateEmail(self.request, user, form.cleaned_data.get('email'))
             return super().form_valid(form)
     
 class CreateLetterView(CreateView):
@@ -55,6 +124,8 @@ class CreateLetterView(CreateView):
         messages.success(self.request, 'El mensaje ha sido enviado a la lista de correo')
         return redirect('create_letter')
 
+####################### DEF TO CLASS #######################
+
 
 ################# PAGINA LISTADO DE EMAILS EN HTML #################
 class ListNewslatterView(ListView):
@@ -70,23 +141,14 @@ class NewslatterDetailView(DetailView):
     context_object_name = 'boletin'
     pk_url_kwarg = 'id'
 
-
 class NewslatterUpdateView(UpdateView):
     model = MailMessage
     template_name = 'letter/reenvio_boletin.html'
     form_class = MailMessageForm
     pk_url_kwarg = 'id'
 
-    # def form_valid(self, form):
-    #     if form.instance.autor == self.request.user or self.request.user.is_superuser:
-    #         return super().form_valid(form)
-    #     else:
-    #         return redirect('login')
-
     def get_success_url(self):
         ################# REENVIO DE BOLETIN ################
-        # print(self.object.message)
-        # OBTENEMOS TODOS LOS CORREO QUE ESTEN ACTIVOS
         emails = Subscribers.objects.filter(activo=True)
         df = read_frame(emails, fieldnames=['email'])
         mail_list = df['email'].values.tolist()
@@ -105,9 +167,6 @@ class NewslatterUpdateView(UpdateView):
 
         # Obtiene el artículo actualizado desde el contexto
         boletin = self.object
-        # mail_letter(boletin)
-        # messages.success(request, 'El mensaje ha sido enviado a la lista de correo') # completar luego, aqui debe de generar un msj al eterminar de enviar.
-        # Genera la URL para la vista 'articulo' usando el slug actualizado del artículo
         return reverse('detail_boletin', kwargs={'id': boletin.id})
 
 ################# PAGE LISTING EMAILS #################
@@ -115,5 +174,6 @@ class ListEmailsView(ListView):
     model: Subscribers
     template_name = 'letter/listing_emails.html' # HTML DONDE SE VERA LA LISTA DE EMALIS
     context_object_name = 'lista_emails' # VARIABLE PARA LA LISTA DE EMAILS
-    # paginate_by = 3
-    queryset = Subscribers.objects.all() # OBTENEMOS TODOS LOS EMAILS
+    queryset = Subscribers.objects.filter(activo=True) # OBTENEMOS TODOS LOS EMAILS
+
+

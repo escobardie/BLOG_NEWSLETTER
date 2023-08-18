@@ -9,8 +9,13 @@ urlpatterns = [
     ################# PAGINA LISTADO DE EMAILS EN HTML #################
     path('listing_letter/', views.ListNewslatterView.as_view(), name='lista_boletin'),
     path('detail_boletin/<int:id>/',views.NewslatterDetailView.as_view(), name='detail_boletin'),
-    # path('reenvio_boletin/<int:id>/',views.NewslatterUpdateView.as_view(), name='reenvio_boletin'),
+    path('listing_emails/', views.ListEmailsView.as_view(), name='lista_emails'),
+    
+    ################# REENVIO DE BOLETIN #################
     path('reenvio_boletin/<int:id>/',views.NewslatterUpdateView.as_view(), name='reenvio_boletin'),
 
-    path('listing_emails/', views.ListEmailsView.as_view(), name='lista_emails'),
+        ################# ACTIVACION DE SUSCRIPTOR #################
+    path("activado/", views.ActivateView.as_view(), name="sub_activado"),
+    path('activate/<str:uidb64>/<str:token>/', views.ConfirmationView.as_view(), name='activate'),
+    
 ]

@@ -21,4 +21,7 @@ DROP USER 'user1'@'localhost';
 
 SHOW TABLES;
 
-select * from blog_comentario;
+select * from auth_user;
+select * from letter_subscribers;
+
+

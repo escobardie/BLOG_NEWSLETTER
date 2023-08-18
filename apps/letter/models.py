@@ -5,8 +5,6 @@ from ckeditor.fields import RichTextField
 
 class Subscribers(models.Model):
     email = models.EmailField(null=True)
-    # SUSCRIPTOR REGISTRADO NACE COMO INACTIVO, HASTA QUE CONFIRME SU CORREO DESDE EL LINK
-    # activo = models.BooleanField(default=True, verbose_name='Activo') # ORIGINAL
     activo = models.BooleanField(default=False, verbose_name='Activo')
     date = models.DateTimeField(auto_now_add=True, verbose_name='Fecha de suscripción')
 
